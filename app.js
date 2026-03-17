@@ -14,10 +14,12 @@ app.set('view engine', 'ejs');
 
 
 mongoose.connect(process.env.MONGO_URL)
-.then(() => console.log('mongoDB connected  successfully')).catch((err) => console.log(err));   
+.then(() => console.log('mongoDB connected  successfully'))
+.catch((err) => console.log(err));   
 
 
 app.get('/', async (req, res) => {
+   
     const urls = await Url.find();
     res.render('index', { urls });  
 })
@@ -25,6 +27,10 @@ app.get('/', async (req, res) => {
 
 
 app.post('/', async (req, res) => {
+    
+         if (!req.body.fullUrl.startsWith('http')) {
+        return res.status(400).send('Invalid URL');
+    }
     const shortId = nanoid(6);
 
     await Url.create({
