@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>URL Shortener</title>
+</head>
+
+<body>
+
+    <h1>URL Shortener</h1>
+
+    <form action="/shorten" method="POST">
+        <input type="url" name="fullUrl" placeholder="Enter long URL" required>
+        <button type="submit">Shorten</button>
+    </form>
+  
+    <table border="1">
+        
+        <tr>
+            <th>Full URL</th>
+            <th>Short URL</th>
+        </tr>
+
+        
+        <% urls.forEach(url => { %>
+
+            <tr>
+                <td><%= url.full %></td>
+                <td>
+                    <a href="/<%= url.short %>"><%= url.short %></a>
+                </td>
+
+            </tr>
+
+        <% }) %>
+
+
+    </table>
+
+</body>
+</html>
