@@ -1,7 +1,10 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import Url from './models/url.js';
+import {Url, User} from './models/url.js';
 import { nanoid } from 'nanoid';
+import bcrypt from 'bcrypt';
+import  jwt  from 'jsonwebtoken';
+import authMiddleware from './middlewares/auth.js';
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -18,12 +21,52 @@ mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log('mongoDB connected  successfully'))
 .catch((err) => console.log(err));   
 
+// user registration 
+app.post('/register', async (req, res) => {
+    const {email, password} = req.body;
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    await User.create({email, password: hashed});
+
+    res.redirect('/');
+})
+
+//user login
+app.post('/login', async (req, res) => {
+    const {email, password} = req.body;
+
+    const user = await User.findOne({email});
+    if (!user) return res.status(400).send('user not found');
+    
+    const match = await bcrypt.compare(password, user.password);
+    if(!match) return res.status(400) .send ('invalid password');
+
+    
+    const token = jwt.sign(
+        { userId: user._id},
+        process.env.JWT_SECRET,
+        {expiresIn: '2 hours'}
+    );
+    
+    res.cookie('token', token);
+    res.send('logged in successfully');
+    res.redirect('/');
+
+})    
+
 
 app.get('/', async (req, res) => {
    
     const urls = await Url.find();
     res.render('index', { urls });  
 })
+
+
+
+app.get("/", authMiddleware, (req, res) => {
+  res.send("welcome to the protected route, user ID: " + req.user.userId);
+});
 
 
 
