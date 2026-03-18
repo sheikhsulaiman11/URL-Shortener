@@ -4,38 +4,48 @@
 <head>
     <title>URL Shortener</title>
 </head>
-
+<%- include('partials/header') %>
+<%- include('partials/footer') %>   
 <body>
 
-    <h1>URL Shortener</h1>
+    <div class="container">
+  <h1>🔗 URL Shortener</h1>
 
+  <div class="card">
     <form action="/shorten" method="POST">
-        <input type="url" name="fullUrl" placeholder="Enter long URL" required>
-        <button type="submit">Shorten</button>
+      <input 
+        type="url" 
+        name="fullUrl" 
+        placeholder="Enter long URL" 
+        required 
+      />
+      <button type="submit">Shorten</button>
     </form>
-  
-    <table border="1">
-        
+  </div>
+
+  <% if (urls && urls.length > 0) { %>
+    <div class="table-container">
+      <table>
         <tr>
-            <th>Full URL</th>
-            <th>Short URL</th>
+          <th>Full URL</th>
+          <th>Short URL</th>
         </tr>
 
-        
         <% urls.forEach(url => { %>
-
-            <tr>
-                <td><%= url.full %></td>
-                <td>
-                    <a href="/<%= url.short %>"><%= url.short %></a>
-                </td>
-
-            </tr>
-
+          <tr>
+            <td><%= url.full %></td>
+            <td>
+              <a href="/<%= url.short %>" class="short-link" target="_blank">
+  <%= url.short %>
+</a>
+            </td>
+          </tr>
         <% }) %>
 
-
-    </table>
+      </table>
+    </div>
+  <% } %>
+</div>
 
 </body>
 </html>
