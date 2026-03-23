@@ -43,8 +43,15 @@ app.post('/register', redirectIfLoggedIn, async (req, res) => {
   if (existing) return res.render('register', { error: 'Email already exists. Please login.' });
 
   const hashed = await bcrypt.hash(password, 10);
-  await User.create({ email, password: hashed });
-  res.redirect('/login');
+  const user =await User.create({ email, password: hashed });
+  
+  const token = jwt.sign(
+    {userId: user._id},
+    process.env.JWT_SECRET,
+    { expiresIn: '2h' }
+  )
+  res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });
+  res.redirect('/');
 });
 
 
