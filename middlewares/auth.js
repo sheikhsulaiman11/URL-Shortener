@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 
-export default function authmiddleware(req, res, next) {
+
+// Middleware to protect routes
+ export function authMiddleware(req, res, next) {
     const token = req.cookies.token;
 
     if (!token) return res.redirect('/login');
@@ -13,3 +15,19 @@ export default function authmiddleware(req, res, next) {
         res.redirect('/login');
     }
 }
+
+// If the user is already logged in, skip login/register pages
+ export function redirectIfLoggedIn(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) return next();
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    return res.redirect('/'); 
+  } catch {
+    res.clearCookie('token');
+    next();
+  }
+}
+
+
