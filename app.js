@@ -76,14 +76,6 @@ app.post('/login', redirectIfLoggedIn, async (req, res) => {
 });
 
 
-//handle logout
-app.post('/logout', (req, res) => {
-  res.clearCookie('token');
-  res.redirect('/login');
-});
-
-
-
 // protected routes
 
 
@@ -96,7 +88,7 @@ app.get('/', authMiddleware, async (req, res) => {
 
 
 // create new short url
-app.post('/', authMiddleware, async (req, res) => {
+app.post('/shorten', authMiddleware, async (req, res) => {
   if (!req.body.fullUrl.startsWith('http')) {
     return res.status(400).send('Invalid URL');
   }
@@ -111,7 +103,6 @@ app.post('/', authMiddleware, async (req, res) => {
 app.get("/:shortId", async (req, res) => {
   const url = await Url.findOne({ short: req.params.shortId });
   if (!url) return res.sendStatus(404);
-  await url.save();
   res.redirect(url.full);
 });
 
