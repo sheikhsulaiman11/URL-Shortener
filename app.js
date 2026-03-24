@@ -88,7 +88,7 @@ app.get('/', authMiddleware, async (req, res) => {
 
 
 // create new short url
-app.post('/shorten', authMiddleware, async (req, res) => {
+app.post('/', authMiddleware, async (req, res) => {
   if (!req.body.fullUrl.startsWith('http')) {
     return res.status(400).send('Invalid URL');
   }
