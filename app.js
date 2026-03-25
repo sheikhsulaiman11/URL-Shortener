@@ -8,15 +8,34 @@ import { authMiddleware, redirectIfLoggedIn } from './middlewares/auth.js';
 import cookieParser from 'cookie-parser';
 import dotenv from "dotenv";
 dotenv.config();
+import multer from 'multer'; 
+import path from 'path';
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
-app.set('view engine', 'ejs');
-app.use(express.static("public"));
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'public/uploads/'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  }
+});
 
+
+
+const upload = multer({ storage: storage }); // Multer middleware for handling file uploads
+
+
+const app = express();  // Create Express app 
+app.use(express.json());  // Middleware to parse JSON bodies
+app.use(express.urlencoded({ extended: true }));  // Middleware to parse URL-encoded bodies
+app.use(cookieParser());  // Middleware to parse cookies
+
+app.set('view engine', 'ejs');  // Set EJS as the templating engine
+app.use(express.static("public"));  // Serve static files from the "public" directory
+
+
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log('mongoDB connected successfully'))
   .catch((err) => console.log(err));
@@ -37,7 +56,7 @@ app.get('/register', redirectIfLoggedIn, (req, res) => {
 
 
 //handle registration
-app.post('/register', redirectIfLoggedIn, async (req, res) => {
+app.post('/register', redirectIfLoggedIn, upload.single('avatar'), async (req, res) => {
   const { email, password } = req.body;
   const existing = await User.findOne({ email });
   if (existing) return res.render('register', { error: 'Email already exists. Please login.' });
@@ -45,12 +64,12 @@ app.post('/register', redirectIfLoggedIn, async (req, res) => {
   const hashed = await bcrypt.hash(password, 10);
   const user =await User.create({ email, password: hashed });
   
-  const token = jwt.sign(
+  const token = jwt.sign(       // Create JWT token with user ID as payload
     {userId: user._id},
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET,    
     { expiresIn: '2h' }
   )
-  res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });
+  res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });  // Set token in HTTP-only cookie
   res.redirect('/');
 });
 
@@ -108,6 +127,12 @@ app.get("/:shortId", async (req, res) => {
 
 
 
-app.listen(process.env.PORT, () => {
+// app.listen(process.env.PORT, () => {
+//   console.log(`Server is running on port ${process.env.PORT}`);
+// });
+
+
+//can use this on my phone
+app.listen(process.env.PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });
