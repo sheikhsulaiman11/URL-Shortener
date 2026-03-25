@@ -1,16 +1,10 @@
-
-<head>
-    <title>URL Shortener</title>
-</head>
 <%- include('partials/header') %>
-<%- include('partials/footer') %>   
-<body>
 
-    <div class="container">
+<div class="container">
   <h1>🔗 URL Shortener</h1>
 
   <div class="card">
-    <form action="/shorten" method="POST">
+    <form action="/" method="POST">
       <input 
         type="url" 
         name="fullUrl" 
@@ -34,8 +28,8 @@
             <td><%= url.full %></td>
             <td>
               <a href="/<%= url.short %>" class="short-link" target="_blank">
-  <%= url.short %>
-</a>
+                <%= url.short %>
+              </a>
             </td>
           </tr>
         <% }) %>
@@ -43,6 +37,9 @@
       </table>
     </div>
   <% } %>
+
+
+
 </div>
 
-</body>
+<%- include('partials/footer') %>

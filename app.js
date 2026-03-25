@@ -81,7 +81,7 @@ app.post('/login', redirectIfLoggedIn, async (req, res) => {
 
 // home page - list of urls
 app.get('/', authMiddleware, async (req, res) => {
-  const urls = await Url.find();
+  const urls = await Url.find({ userId: req.user.userId });
   res.render('index', { urls });
 });
 
@@ -93,7 +93,7 @@ app.post('/', authMiddleware, async (req, res) => {
     return res.status(400).send('Invalid URL');
   }
   const shortId = nanoid(6);
-  await Url.create({ full: req.body.fullUrl, short: shortId });
+  await Url.create({ full: req.body.fullUrl, short: shortId, userId: req.user.userId });
   res.redirect('/');
 });
 
