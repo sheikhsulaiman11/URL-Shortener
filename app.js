@@ -12,6 +12,7 @@ import multer from 'multer';
 import path from 'path';
 
 
+
 // Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads/'),
@@ -23,16 +24,20 @@ const storage = multer.diskStorage({
 
 
 
-const upload = multer({ storage: storage }); // Multer middleware for handling file uploads
+const upload = multer({ storage: storage });      // Multer middleware for handling file uploads
 
+const app = express();        // Create Express app 
 
-const app = express();  // Create Express app 
-app.use(express.json());  // Middleware to parse JSON bodies
-app.use(express.urlencoded({ extended: true }));  // Middleware to parse URL-encoded bodies
-app.use(cookieParser());  // Middleware to parse cookies
+app.use(express.json());        // Middleware to parse JSON bodies
 
-app.set('view engine', 'ejs');  // Set EJS as the templating engine
-app.use(express.static("public"));  // Serve static files from the "public" directory
+app.use(express.urlencoded({ extended: true }));          // Middleware to parse URL-encoded bodies
+
+app.use(cookieParser());          // Middleware to parse cookies
+
+app.set('view engine', 'ejs');         // Set EJS as the templating engine
+
+app.use(express.static("public"));        // Serve static files from the "public" directory
+
 
 
 // Connect to MongoDB
@@ -48,10 +53,12 @@ app.get('/login', redirectIfLoggedIn, (req, res) => {
 });
 
 
+
 //get register page
 app.get('/register', redirectIfLoggedIn, (req, res) => {
   res.render('register', { error: null });
 });
+
 
 
 
@@ -61,7 +68,7 @@ app.post('/register', redirectIfLoggedIn, upload.single('avatar'), async (req, r
   const existing = await User.findOne({ email });
   if (existing) return res.render('register', { error: 'Email already exists. Please login.' });
 
-  const hashed = await bcrypt.hash(password, 10);
+  const hashed = await bcrypt.hash(password, 10);       // Hash the password before saving to the database
   const user =await User.create({ email, password: hashed });
   
   const token = jwt.sign(       // Create JWT token with user ID as payload
@@ -72,6 +79,7 @@ app.post('/register', redirectIfLoggedIn, upload.single('avatar'), async (req, r
   res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });  // Set token in HTTP-only cookie
   res.redirect('/');
 });
+
 
 
 
@@ -93,6 +101,7 @@ app.post('/login', redirectIfLoggedIn, async (req, res) => {
   res.cookie('token', token, { httpOnly: true, maxAge: 2 * 60 * 60 * 1000 });
   res.redirect('/');
 });
+
 
 
 // protected routes
